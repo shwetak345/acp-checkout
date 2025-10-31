@@ -1,0 +1,18 @@
+[project]
+name = "acp-checkout-python"
+version = "0.1.0"
+description = "Minimal ACP checkout server in Python (FastAPI)"
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.111.0",
+  "uvicorn[standard]>=0.30.0",
+  "pydantic>=2.7.0",
+  "python-dotenv>=1.0.1",
+  "httpx>=0.27.0"
+]
+
+[tool.uvicorn]
+host = "0.0.0.0"
+port = 3000
+reload = true
+app = "app.main:app"

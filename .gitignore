@@ -1,0 +1,52 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ---- Virtual environments ----
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+
+# ---- Environment variables ----
+.env
+.env.*
+
+# ---- IDE / Editor settings ----
+.vscode/
+.idea/
+*.swp
+
+# ---- OS files ----
+.DS_Store
+Thumbs.db
+
+# ---- Build artifacts ----
+build/
+dist/
+*.egg-info/
+
+# ---- Logs and caches ----
+*.log
+.cache/
+.pytest_cache/
+
+# ---- Coverage reports ----
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pyre/
+
+# ---- Postman collections ----
+postman_collection/*.tmp
+
+# ---- Zip archives ----
+*.zip

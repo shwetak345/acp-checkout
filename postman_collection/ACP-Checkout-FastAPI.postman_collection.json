@@ -1,0 +1,172 @@
+{
+  "info": {
+    "name": "ACP Checkout (FastAPI)",
+    "_postman_id": "a3f5e5f0-0000-4000-9000-000000acpchk",
+    "description": "Postman collection for the Python/FastAPI ACP checkout server.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/healthz",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "healthz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create Checkout Session",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "try {",
+              "  const data = pm.response.json();",
+              "  if (data && data.id) {",
+              "    pm.collectionVariables.set('last_session_id', data.id);",
+              "    console.log('Set last_session_id =', data.id);",
+              "  }",
+              "} catch (e) {",
+              "  console.warn('Could not parse JSON:', e);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"items\": [\n    {\n      \"id\": \"sku_mug_001\",\n      \"quantity\": 1\n    },\n    {\n      \"id\": \"sku_tee_001\",\n      \"quantity\": 1\n    }\n  ],\n  \"fulfillment_address\": {\n    \"name\": \"Alex Doe\",\n    \"line_one\": \"123 Main St\",\n    \"city\": \"San Francisco\",\n    \"state\": \"CA\",\n    \"country\": \"US\",\n    \"postal_code\": \"94105\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/checkout_sessions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "checkout_sessions"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update Checkout Session",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"items\": [\n    {\n      \"id\": \"sku_mug_001\",\n      \"quantity\": 1\n    }\n  ],\n  \"fulfillment_option_id\": \"ship_exp\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/checkout_sessions/{{last_session_id}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "checkout_sessions",
+            "{{last_session_id}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Complete Checkout Session",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"payment_data\": {\n    \"token\": \"tok_mock_12345\",\n    \"provider\": \"stripe\",\n    \"billing_address\": {\n      \"name\": \"Alex Doe\",\n      \"line_one\": \"123 Main St\",\n      \"city\": \"San Francisco\",\n      \"state\": \"CA\",\n      \"country\": \"US\",\n      \"postal_code\": \"94105\"\n    }\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/checkout_sessions/{{last_session_id}}/complete",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "checkout_sessions",
+            "{{last_session_id}}",
+            "complete"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Checkout Session",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/checkout_sessions/{{last_session_id}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "checkout_sessions",
+            "{{last_session_id}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Cancel Checkout Session",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/checkout_sessions/{{last_session_id}}/cancel",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "checkout_sessions",
+            "{{last_session_id}}",
+            "cancel"
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:3000"
+    },
+    {
+      "key": "last_session_id",
+      "value": ""
+    }
+  ]
+}
