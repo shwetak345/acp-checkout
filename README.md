@@ -158,3 +158,445 @@ __Expected behavior__
 | After `/cancel`     | Status → `canceled`, further updates blocked |
 | After `/complete`   | Immutable session — cannot cancel or modify  |
 
+__Example API Request Response__
+- **Get Health**
+```json
+GET to {{baseUrl}}/healthz
+Response:
+{
+    "ok": true
+}
+```
+
+- **Create Checkout Session**
+```json
+  POST to {{baseUrl}}/checkout_sessions with request body:
+  {
+  "items": [
+    {
+      "id": "sku_mug_001",
+      "quantity": 1
+    },
+    {
+      "id": "sku_tee_001",
+      "quantity": 1
+    }
+  ],
+  "fulfillment_address": {
+    "name": "Alex Doe",
+    "line_one": "123 Main St",
+    "city": "San Francisco",
+    "state": "CA",
+    "country": "US",
+    "postal_code": "94105"
+  }
+}
+
+Response:
+{
+    "id": "cs_a8134a89e1",
+    "payment_provider": {
+        "provider": "stripe",
+        "supported_payment_methods": [
+            "card"
+        ]
+    },
+    "status": "ready_for_payment",
+    "currency": "usd",
+    "line_items": [
+        {
+            "id": "li_b00944e1d5",
+            "item": {
+                "id": "sku_mug_001",
+                "quantity": 1
+            },
+            "base_amount": 1800,
+            "discount": 0,
+            "subtotal": 1800,
+            "tax": 153,
+            "total": 1953
+        },
+        {
+            "id": "li_e15aac7d2c",
+            "item": {
+                "id": "sku_tee_001",
+                "quantity": 1
+            },
+            "base_amount": 2500,
+            "discount": 0,
+            "subtotal": 2500,
+            "tax": 213,
+            "total": 2713
+        }
+    ],
+    "fulfillment_address": {
+        "name": "Alex Doe",
+        "line_one": "123 Main St",
+        "line_two": null,
+        "city": "San Francisco",
+        "state": "CA",
+        "country": "US",
+        "postal_code": "94105"
+    },
+    "fulfillment_options": [
+        {
+            "id": "ship_econ",
+            "label": "Economy (5–7 days)",
+            "amount": 599,
+            "eta_days": 7
+        },
+        {
+            "id": "ship_exp",
+            "label": "Express (2–3 days)",
+            "amount": 1299,
+            "eta_days": 3
+        }
+    ],
+    "fulfillment_option_id": "ship_econ",
+    "totals": [
+        {
+            "type": "items_base_amount",
+            "display_text": "Item(s) total",
+            "amount": 4300
+        },
+        {
+            "type": "tax",
+            "display_text": "Tax",
+            "amount": 366
+        },
+        {
+            "type": "shipping",
+            "display_text": "Shipping",
+            "amount": 599
+        },
+        {
+            "type": "total",
+            "display_text": "Total",
+            "amount": 5265
+        }
+    ],
+    "messages": [],
+    "links": [
+        {
+            "type": "terms_of_use",
+            "url": "https://example.com/terms"
+        },
+        {
+            "type": "privacy_policy",
+            "url": "https://example.com/privacy"
+        }
+    ],
+    "order_id": null
+}
+```
+
+- **Update Checkout Session**
+```json
+POST to {{baseUrl}}/checkout_sessions/{{last_session_id}} with reqquest body:
+{
+  "items": [
+    {
+      "id": "sku_mug_001",
+      "quantity": 1
+    }
+  ],
+  "fulfillment_option_id": "ship_exp"
+}
+
+Response:
+{
+    "id": "cs_a8134a89e1",
+    "payment_provider": {
+        "provider": "stripe",
+        "supported_payment_methods": [
+            "card"
+        ]
+    },
+    "status": "ready_for_payment",
+    "currency": "usd",
+    "line_items": [
+        {
+            "id": "li_d265f79a36",
+            "item": {
+                "id": "sku_mug_001",
+                "quantity": 1
+            },
+            "base_amount": 1800,
+            "discount": 0,
+            "subtotal": 1800,
+            "tax": 153,
+            "total": 1953
+        }
+    ],
+    "fulfillment_address": {
+        "name": "Alex Doe",
+        "line_one": "123 Main St",
+        "line_two": null,
+        "city": "San Francisco",
+        "state": "CA",
+        "country": "US",
+        "postal_code": "94105"
+    },
+    "fulfillment_options": [
+        {
+            "id": "ship_econ",
+            "label": "Economy (5–7 days)",
+            "amount": 599,
+            "eta_days": 7
+        },
+        {
+            "id": "ship_exp",
+            "label": "Express (2–3 days)",
+            "amount": 1299,
+            "eta_days": 3
+        }
+    ],
+    "fulfillment_option_id": "ship_exp",
+    "totals": [
+        {
+            "type": "items_base_amount",
+            "display_text": "Item(s) total",
+            "amount": 1800
+        },
+        {
+            "type": "tax",
+            "display_text": "Tax",
+            "amount": 153
+        },
+        {
+            "type": "shipping",
+            "display_text": "Shipping",
+            "amount": 1299
+        },
+        {
+            "type": "total",
+            "display_text": "Total",
+            "amount": 3252
+        }
+    ],
+    "messages": [],
+    "links": [
+        {
+            "type": "terms_of_use",
+            "url": "https://example.com/terms"
+        },
+        {
+            "type": "privacy_policy",
+            "url": "https://example.com/privacy"
+        }
+    ],
+    "order_id": null
+}
+```
+
+- **Complete Checkout Session**
+```json
+POST to {{baseUrl}}/checkout_sessions/{{last_session_id}}/complete with request body:
+{
+  "payment_data": {
+    "token": "tok_mock_12345",
+    "provider": "stripe",
+    "billing_address": {
+      "name": "Alex Doe",
+      "line_one": "123 Main St",
+      "city": "San Francisco",
+      "state": "CA",
+      "country": "US",
+      "postal_code": "94105"
+    }
+  }
+}
+
+Response:
+{
+    "id": "cs_a8134a89e1",
+    "payment_provider": {
+        "provider": "stripe",
+        "supported_payment_methods": [
+            "card"
+        ]
+    },
+    "status": "completed",
+    "currency": "usd",
+    "line_items": [
+        {
+            "id": "li_d265f79a36",
+            "item": {
+                "id": "sku_mug_001",
+                "quantity": 1
+            },
+            "base_amount": 1800,
+            "discount": 0,
+            "subtotal": 1800,
+            "tax": 153,
+            "total": 1953
+        }
+    ],
+    "fulfillment_address": {
+        "name": "Alex Doe",
+        "line_one": "123 Main St",
+        "line_two": null,
+        "city": "San Francisco",
+        "state": "CA",
+        "country": "US",
+        "postal_code": "94105"
+    },
+    "fulfillment_options": [
+        {
+            "id": "ship_econ",
+            "label": "Economy (5–7 days)",
+            "amount": 599,
+            "eta_days": 7
+        },
+        {
+            "id": "ship_exp",
+            "label": "Express (2–3 days)",
+            "amount": 1299,
+            "eta_days": 3
+        }
+    ],
+    "fulfillment_option_id": "ship_exp",
+    "totals": [
+        {
+            "type": "items_base_amount",
+            "display_text": "Item(s) total",
+            "amount": 1800
+        },
+        {
+            "type": "tax",
+            "display_text": "Tax",
+            "amount": 153
+        },
+        {
+            "type": "shipping",
+            "display_text": "Shipping",
+            "amount": 1299
+        },
+        {
+            "type": "total",
+            "display_text": "Total",
+            "amount": 3252
+        }
+    ],
+    "messages": [],
+    "links": [
+        {
+            "type": "terms_of_use",
+            "url": "https://example.com/terms"
+        },
+        {
+            "type": "privacy_policy",
+            "url": "https://example.com/privacy"
+        }
+    ],
+    "order_id": "ord_d51593ed5b"
+}
+```
+
+- **Cancel Checkout Session**
+```json
+POST to {{baseUrl}}/checkout_sessions/{{last_session_id}}/cancel
+
+Response:
+{
+    "detail": "Cannot cancel a completed session"
+}
+
+Please note, a completed session cannot be cancelled, hence we see above response. For a checkout session that was not completed, a cancel response would look like:
+
+{
+    "id": "cs_a04def965c",
+    "payment_provider": {
+        "provider": "stripe",
+        "supported_payment_methods": [
+            "card"
+        ]
+    },
+    "status": "canceled",
+    "currency": "usd",
+    "line_items": [
+        {
+            "id": "li_0581c55d22",
+            "item": {
+                "id": "sku_mug_001",
+                "quantity": 1
+            },
+            "base_amount": 1800,
+            "discount": 0,
+            "subtotal": 1800,
+            "tax": 153,
+            "total": 1953
+        },
+        {
+            "id": "li_237fd1763a",
+            "item": {
+                "id": "sku_tee_001",
+                "quantity": 1
+            },
+            "base_amount": 2500,
+            "discount": 0,
+            "subtotal": 2500,
+            "tax": 213,
+            "total": 2713
+        }
+    ],
+    "fulfillment_address": {
+        "name": "Alex Doe",
+        "line_one": "123 Main St",
+        "line_two": null,
+        "city": "San Francisco",
+        "state": "CA",
+        "country": "US",
+        "postal_code": "94105"
+    },
+    "fulfillment_options": [
+        {
+            "id": "ship_econ",
+            "label": "Economy (5–7 days)",
+            "amount": 599,
+            "eta_days": 7
+        },
+        {
+            "id": "ship_exp",
+            "label": "Express (2–3 days)",
+            "amount": 1299,
+            "eta_days": 3
+        }
+    ],
+    "fulfillment_option_id": "ship_econ",
+    "totals": [
+        {
+            "type": "items_base_amount",
+            "display_text": "Item(s) total",
+            "amount": 4300
+        },
+        {
+            "type": "tax",
+            "display_text": "Tax",
+            "amount": 366
+        },
+        {
+            "type": "shipping",
+            "display_text": "Shipping",
+            "amount": 599
+        },
+        {
+            "type": "total",
+            "display_text": "Total",
+            "amount": 5265
+        }
+    ],
+    "messages": [],
+    "links": [
+        {
+            "type": "terms_of_use",
+            "url": "https://example.com/terms"
+        },
+        {
+            "type": "privacy_policy",
+            "url": "https://example.com/privacy"
+        }
+    ],
+    "order_id": null
+}
+```
