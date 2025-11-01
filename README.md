@@ -160,17 +160,17 @@ __Expected behavior__
 
 __Example API Request Response__
 - **Get Health**
-```json
 GET to {{baseUrl}}/healthz
 Response:
+```json
 {
     "ok": true
 }
 ```
 
 - **Create Checkout Session**
+POST to {{baseUrl}}/checkout_sessions with request body:
 ```json
-  POST to {{baseUrl}}/checkout_sessions with request body:
   {
   "items": [
     {
@@ -191,8 +191,10 @@ Response:
     "postal_code": "94105"
   }
 }
+```
 
 Response:
+```json
 {
     "id": "cs_a8134a89e1",
     "payment_provider": {
@@ -291,8 +293,8 @@ Response:
 ```
 
 - **Update Checkout Session**
-```json
 POST to {{baseUrl}}/checkout_sessions/{{last_session_id}} with reqquest body:
+```json
 {
   "items": [
     {
@@ -302,8 +304,10 @@ POST to {{baseUrl}}/checkout_sessions/{{last_session_id}} with reqquest body:
   ],
   "fulfillment_option_id": "ship_exp"
 }
+```
 
 Response:
+```json
 {
     "id": "cs_a8134a89e1",
     "payment_provider": {
@@ -390,8 +394,8 @@ Response:
 ```
 
 - **Complete Checkout Session**
-```json
 POST to {{baseUrl}}/checkout_sessions/{{last_session_id}}/complete with request body:
+```json
 {
   "payment_data": {
     "token": "tok_mock_12345",
@@ -406,8 +410,10 @@ POST to {{baseUrl}}/checkout_sessions/{{last_session_id}}/complete with request 
     }
   }
 }
+```
 
 Response:
+```json
 {
     "id": "cs_a8134a89e1",
     "payment_provider": {
@@ -494,16 +500,17 @@ Response:
 ```
 
 - **Cancel Checkout Session**
-```json
 POST to {{baseUrl}}/checkout_sessions/{{last_session_id}}/cancel
 
 Response:
+```json
 {
     "detail": "Cannot cancel a completed session"
 }
+```
 
 Please note, a completed session cannot be cancelled, hence we see above response. For a checkout session that was not completed, a cancel response would look like:
-
+```json
 {
     "id": "cs_a04def965c",
     "payment_provider": {
