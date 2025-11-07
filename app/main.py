@@ -11,10 +11,12 @@ from .utils import (
 )
 from .payments import authorize_charge, PaymentDeclined
 from .orders import create_order, emit_order_event, Order
+from app.models import Feedback
 
 app = FastAPI(title="ACP Checkout (Python)", version="0.1.0")
 
 sessions: Dict[str, ACPCheckoutSession] = {}
+FEEDBACK_LOG: dict[str, dict] = {}
 
 @app.get("/healthz")
 def healthz():
@@ -153,3 +155,64 @@ def get_session(session_id: str):
     if not s:
         raise HTTPException(404, "not_found")
     return s
+
+@app.post("/feedback")
+def submit_feedback(feedback: Feedback):
+    # Validate rating is between 1 and 5
+    if not (1 <= feedback.rating <= 5):
+        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
+
+    # Save entry keyed by session_id
+    FEEDBACK_LOG[feedback.session_id] = {
+        "rating": feedback.rating,
+        "comment": feedback.comment
+    }
+
+    return {"message": "Thanks for your feedback!"}
+
+@app.get("/feedback/{session_id}")
+def get_feedback(session_id: str):
+    return FEEDBACK_LOG.get(session_id, {"message": "no feedback found"})
+
+@app.get("/simulate_restock_reminders")
+def simulate_restock_reminders():
+    """
+    Simulate restock reminder notifications.
+    Instead of sending email, return what *would* be sent.
+    """
+    reminders = []
+
+    for session_id, session in sessions.items():
+        # Look through all line items in the session
+        if session.status == "canceled":
+            continue
+        for li in session.line_items:
+            pref = li.item.restock_preference
+
+            # Only send reminders if enabled
+            if pref and pref.enabled:
+                product_id = li.item.id
+                remind_in_days = pref.remind_in_days
+
+                body_lines = [
+                    "Hi there — just a friendly reminder!\n",
+                    "You may want to reorder the item you purchased:",
+                    f"• Product ID: {product_id}"
+                ]
+
+                if remind_in_days:
+                    body_lines.append(f"• Reminder was set for ~{remind_in_days} days")
+
+                body_lines.append(
+                    "\nIf you'd like to reorder, just return to your chat assistant. 🙂"
+                )
+
+                reminders.append({
+                    "to": f"user_for_session_{session_id}@example.com",
+                    "subject": "Time to Restock Your Item?",
+                    "body": "\n".join(body_lines)
+                })
+
+    return {"mock_email_reminders": reminders}
+
+

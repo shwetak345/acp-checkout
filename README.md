@@ -607,3 +607,105 @@ Please note, a completed session cannot be cancelled, hence we see above respons
     "order_id": null
 }
 ```
+
+## 10. Optional Enhancements (Feedback + Restock Reminders)
+
+*These features demonstrate how merchants could extend ACP-powered checkout flows with post-purchase engagement and reorder experiences.*
+
+### A. Collecting Post-Purchase Feedback
+
+After a checkout session is completed, the AI agent may ask the user for feedback such as a **1–5 rating** and an optional comment.  
+This demo exposes an API endpoint for posting feedback and stores the data in-memory (for demonstration only)..
+
+#### Submit Feedback
+**POST** `{{baseUrl}}/feedback`
+
+**Request Body**
+```json
+{
+  "session_id": "cs_12345",
+  "rating": 5,
+  "comment": "Loved the product and fast shipping!"
+}
+```
+
+**Response**
+```json
+{ "message": "Thanks for your feedback!" }
+```
+
+#### Retrieve Feedback
+**GET** `{{baseUrl}}/feedback/{{last_session_id}}`
+
+**Response**
+```json
+{
+  "rating": 5,
+  "comment": "Loved the product and fast shipping!"
+}
+```
+
+---
+
+### B. Restock / Refill Reminders
+
+Users can optionally enable **restock reminders** for items that run out (e.g., coffee beans, vitamins, detergent, etc.) during checkout.  
+The reminder is stored per-line-item inside the session.
+
+Users can set this during session creation (POST to {{baseUrl}}/checkout_sessions) or session update (POST to {{baseUrl}}/checkout_sessions/{{last_session_id}}).
+
+Example items snippet in request body:
+
+```json
+"items": [
+  {
+    "id": "sku_mug_001",
+    "quantity": 1
+  },
+  {
+    "id": "sku_tee_001",
+    "quantity": 1,
+    "restock_preference": {
+      "enabled": true,
+      "remind_in_days": 30
+    }
+  }
+]
+```
+
+To **simulate** reminder notifications:
+
+**GET** `{{baseUrl}}/simulate_restock_reminders`
+
+**Response Example**
+```json
+{
+  "mock_email_reminders": [
+    {
+      "to": "user_for_session_cs_12345@example.com",
+      "subject": "Time to Restock Your Item?",
+      "body": "Hi there — just a friendly reminder!\n\nYou may want to reorder:\n• Product ID: sku_mug_001\n• Reminder was set for ~45 days\n\nIf you'd like to reorder, just return to your chat assistant. 🙂"
+    }
+  ]
+}
+```
+
+---
+
+## 11. Want to Contribute?
+
+This project aims to help the community understand **how conversational commerce can work in practice** — beyond just theory.
+
+If you're exploring:
+- Post-purchase workflows  
+- Loyalty & rewards  
+- Subscriptions / refill cycles  
+- Gift messaging  
+- Personalized product recommendations  
+
+If you’d like to support or extend this prototype, you can:
+- Star the repo to show support
+- Open an issue for feedback, bugs, or feature ideas
+- Create a code review request if you’d like to suggest an enhancement 
+
+Even **small enhancements** or **documentation improvements** are welcome.

@@ -1,9 +1,15 @@
 from pydantic import BaseModel, Field
-from typing import List, Literal, Optional, Any
+from typing import List, Literal, Optional, Dict, Any
+
+class RestockPreference(BaseModel):
+    enabled: bool
+    # guardrails; allow 1–365 days, default later if omitted
+    remind_in_days: Optional[int] = Field(default=None, ge=1, le=365)
 
 class Item(BaseModel):
     id: str
     quantity: int = Field(gt=0)
+    restock_preference: Optional[RestockPreference] = None
 
 class Address(BaseModel):
     name: Optional[str] = None
@@ -83,3 +89,10 @@ class ACPCheckoutSession(BaseModel):
     messages: List[Message]
     links: List[Link]
     order_id: Optional[str] = None
+
+class Feedback(BaseModel):
+    session_id: str
+    rating: int  # 1 to 5
+    comment: str | None = None
+
+

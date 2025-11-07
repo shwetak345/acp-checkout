@@ -1,9 +1,10 @@
 {
   "info": {
+    "_postman_id": "a2ee11fe-a74d-4ebc-b139-a6abf98dc840",
     "name": "ACP Checkout (FastAPI)",
-    "_postman_id": "a3f5e5f0-0000-4000-9000-000000acpchk",
     "description": "Postman collection for the Python/FastAPI ACP checkout server.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "4837318"
   },
   "item": [
     {
@@ -20,7 +21,8 @@
             "healthz"
           ]
         }
-      }
+      },
+      "response": []
     },
     {
       "name": "Create Checkout Session",
@@ -68,7 +70,59 @@
             "checkout_sessions"
           ]
         }
-      }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Checkout Session with restock_preference",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "try {",
+              "  const data = pm.response.json();",
+              "  if (data && data.id) {",
+              "    pm.collectionVariables.set('last_session_id', data.id);",
+              "    console.log('Set last_session_id =', data.id);",
+              "  }",
+              "} catch (e) {",
+              "  console.warn('Could not parse JSON:', e);",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n   \"items\":[\n      {\n         \"id\":\"sku_mug_001\",\n         \"quantity\":1\n      },\n      {\n         \"id\":\"sku_tee_001\",\n         \"quantity\":1,\n         \"restock_preference\":{\n            \"enabled\":true,\n            \"remind_in_days\":30\n         }\n      }\n   ],\n   \"fulfillment_address\":{\n      \"name\":\"Alex Doe\",\n      \"line_one\":\"123 Main St\",\n      \"city\":\"San Francisco\",\n      \"state\":\"CA\",\n      \"country\":\"US\",\n      \"postal_code\":\"94105\"\n   }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/checkout_sessions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "checkout_sessions"
+          ]
+        }
+      },
+      "response": []
     },
     {
       "name": "Update Checkout Session",
@@ -94,7 +148,35 @@
             "{{last_session_id}}"
           ]
         }
-      }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Checkout Session with restock preference",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n   \"items\":[\n      {\n         \"id\":\"sku_mug_001\",\n         \"quantity\":1,\n         \"restock_preference\":{\n            \"enabled\":true,\n            \"remind_in_days\":30\n         }\n      }\n   ],\n   \"fulfillment_option_id\":\"ship_exp\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/checkout_sessions/{{last_session_id}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "checkout_sessions",
+            "{{last_session_id}}"
+          ]
+        }
+      },
+      "response": []
     },
     {
       "name": "Complete Checkout Session",
@@ -121,7 +203,8 @@
             "complete"
           ]
         }
-      }
+      },
+      "response": []
     },
     {
       "name": "Get Checkout Session",
@@ -138,7 +221,8 @@
             "{{last_session_id}}"
           ]
         }
-      }
+      },
+      "response": []
     },
     {
       "name": "Cancel Checkout Session",
@@ -156,7 +240,81 @@
             "cancel"
           ]
         }
-      }
+      },
+      "response": []
+    },
+    {
+      "name": "feedback",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"session_id\": \"{{last_session_id}}\",\r\n  \"rating\": 3,\r\n  \"comment\": \"Checkout was smooth!\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/feedback",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "feedback"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "feedback",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/feedback/{{last_session_id}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "feedback",
+            "{{last_session_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Simulate restock Reminders",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n   \"items\":[\n      {\n         \"id\":\"sku_mug_001\",\n         \"quantity\":1,\n         \"restock_preference\":{\n            \"enabled\":true,\n            \"remind_in_days\":30\n         }\n      },\n      {\n         \"id\":\"sku_tee_001\",\n         \"quantity\":1\n      }\n   ],\n   \"fulfillment_address\":{\n      \"name\":\"Alex Doe\",\n      \"line_one\":\"123 Main St\",\n      \"city\":\"San Francisco\",\n      \"state\":\"CA\",\n      \"country\":\"US\",\n      \"postal_code\":\"94105\"\n   }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/simulate_restock_reminders",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "simulate_restock_reminders"
+          ]
+        }
+      },
+      "response": []
     }
   ],
   "variable": [
