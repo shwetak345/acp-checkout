@@ -10,6 +10,8 @@
 7. [Competing Protocol-AP2](#7-competing-protocol-ap2)
 8. [Run Demo](#8-run-demo)
 9. [Test the API with Postman](#9-test-the-api-with-postman)
+10. [Optional Enhancements (Feedback + Restock Reminders)](#10-optional-enhancements-feedback--restock-reminders)
+11. [Want to Contribute?](#11-want-to-contribute)
 
 ---
 
